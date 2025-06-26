@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfFinance.Domain", "SelfFinance.Domain\SelfFinance.Domain.csproj", "{85FB5A44-A462-406A-95F6-17D094F27BD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfFinance.Application", "SelfFinance.Application\SelfFinance.Application.csproj", "{6DA40470-FF30-4DA0-BDEE-7A2D1A9CCAF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfFinance.Infrastructure", "SelfFinance.Infrastructure\SelfFinance.Infrastructure.csproj", "{8207CD1B-8858-4C71-883F-9C56CABFAF8C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfFinance.WebApi", "SelfFinance.WebApi\SelfFinance.WebApi.csproj", "{082E59F7-2C93-4600-BDF1-014DD111DE05}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85FB5A44-A462-406A-95F6-17D094F27BD6} = {85FB5A44-A462-406A-95F6-17D094F27BD6}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfFinance.Blazor", "SelfFinance.Blazor\SelfFinance.Blazor.csproj", "{98798F95-2D92-4695-A2CC-FDF70BD79D17}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{85FB5A44-A462-406A-95F6-17D094F27BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85FB5A44-A462-406A-95F6-17D094F27BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85FB5A44-A462-406A-95F6-17D094F27BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85FB5A44-A462-406A-95F6-17D094F27BD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DA40470-FF30-4DA0-BDEE-7A2D1A9CCAF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DA40470-FF30-4DA0-BDEE-7A2D1A9CCAF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DA40470-FF30-4DA0-BDEE-7A2D1A9CCAF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DA40470-FF30-4DA0-BDEE-7A2D1A9CCAF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8207CD1B-8858-4C71-883F-9C56CABFAF8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8207CD1B-8858-4C71-883F-9C56CABFAF8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8207CD1B-8858-4C71-883F-9C56CABFAF8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8207CD1B-8858-4C71-883F-9C56CABFAF8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{082E59F7-2C93-4600-BDF1-014DD111DE05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{082E59F7-2C93-4600-BDF1-014DD111DE05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{082E59F7-2C93-4600-BDF1-014DD111DE05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{082E59F7-2C93-4600-BDF1-014DD111DE05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98798F95-2D92-4695-A2CC-FDF70BD79D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98798F95-2D92-4695-A2CC-FDF70BD79D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98798F95-2D92-4695-A2CC-FDF70BD79D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98798F95-2D92-4695-A2CC-FDF70BD79D17}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35D0A2BC-3BCF-464E-810C-4350005F4935}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,235 @@
+﻿@page "/financialoperations"
+@using SelfFinance.Application.DTOs.FinancialOperation
+@using SelfFinance.Application.DTOs.TransactionType
+@using SelfFinance.Blazor.Services
+@inject FinancialOperationService FinancialOperationService
+@inject TransactionTypeService TransactionTypeService
+@inject IJSRuntime JS
+
+<h3>Financial Operations</h3>
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreateForm">Add New</button>
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped data-table-4cols">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in operations)
+            {
+                bool isSelected = item.Id == SelectedId;
+                <tr @onclick="() => SelectRow(item.Id)"
+                    class="@(isSelected ? "selected-row" : "")"
+                    style="cursor:pointer;">
+                    <td>@item.Description</td>
+                    <td>@FormatAmount(item.Amount, item.TransactionTypeId)</td>
+                    <td>@item.Date.ToString("g")</td>
+                    <td>
+                        @if (isSelected)
+                        {
+                            <button class="btn btn-sm btn-secondary" @onclick="() => EditOperation(item)" @onclick:stopPropagation> Edit </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteOperation(item.Id)" @onclick:stopPropagation> Delete </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (ShowForm)
+{
+    <EditForm Model="CurrentOperation" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Description:</label>
+            <InputText class="form-control" @bind-Value="CurrentOperation.Description" />
+        </div>
+        <div class="mb-3">
+            <label>Amount:</label>
+            <InputNumber class="form-control" @bind-Value="CurrentOperation.Amount" />
+        </div>
+        <div class="mb-3">
+            <label>Date and Time:</label>
+            <input type="datetime-local" class="form-control" @bind="CurrentOperation.Date" />
+        </div>
+        <div class="mb-3">
+            <label>Transaction Type:</label>
+            <InputSelect class="form-control" @bind-Value="CurrentOperation.TransactionTypeId">
+                <option value="">-- Select Transaction Type --</option>
+                @foreach (var type in transactionTypes)
+                {
+                    <option value="@type.Id">@type.Name</option>
+                }
+            </InputSelect>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="CancelForm">Cancel</button>
+    </EditForm>
+}
+
+@code {
+    private List<FinancialOperationDto> operations = new();
+    private FinancialOperationCreateDto CurrentOperation = new();
+    private List<TransactionTypeDto> transactionTypes = new();
+    
+    private int? EditingId = null;
+    private bool ShowForm = false;
+    private bool IsLoading = true;
+    private string? ErrorMessage;
+    private int? SelectedId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactionTypes();
+        await LoadOperations();
+    }
+
+    private async Task LoadOperations()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            operations = await FinancialOperationService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error loading data: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadTransactionTypes()
+    {
+        try
+        {
+            transactionTypes = await TransactionTypeService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error loading transaction types: {ex.Message}";
+        }
+    }
+
+
+    private void ShowCreateForm()
+    {
+        EditingId = null;
+        CurrentOperation = new FinancialOperationCreateDto
+            {
+                Date = DateTime.Today
+            };
+        ShowForm = true;
+    }
+
+    private void EditOperation(FinancialOperationDto item)
+    {
+        EditingId = item.Id;
+        CurrentOperation = new FinancialOperationCreateDto
+            {
+                Description = item.Description,
+                Amount = item.Amount,
+                Date = item.Date,
+                TransactionTypeId = item.TransactionTypeId
+            };
+        ShowForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        bool success;
+        if (EditingId.HasValue)
+        {
+            var updateDto = new FinancialOperationUpdateDto
+                {
+                    Description = CurrentOperation.Description,
+                    Amount = CurrentOperation.Amount,
+                    Date = CurrentOperation.Date,
+                    TransactionTypeId = CurrentOperation.TransactionTypeId
+                };
+
+            success = await FinancialOperationService.UpdateAsync(EditingId.Value, updateDto);
+        }
+        else
+        {
+            var created = await FinancialOperationService.CreateAsync(CurrentOperation);
+            success = created != null;
+        }
+
+        if (success)
+        {
+            ShowForm = false;
+            await LoadOperations();
+        }
+        else
+        {
+            ErrorMessage = "Operation failed";
+        }
+    }
+
+    private async Task DeleteOperation(int id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this item?");
+        if (confirmed)
+        {
+            var success = await FinancialOperationService.DeleteAsync(id);
+            if (success)
+            {
+                await LoadOperations();
+                if (SelectedId == id)
+                    SelectedId = null;
+            }
+            else
+            {
+                ErrorMessage = "Delete failed";
+            }
+        }
+    }
+
+    private string FormatAmount(decimal amount, int transactionTypeId)
+    {
+        var type = transactionTypes.FirstOrDefault(t => t.Id == transactionTypeId);
+        if (type is null)
+            return $"? {amount:N2}";
+
+        var sign = type.IsIncome ? "+" : "-";
+        return $"{sign} {amount:N2}";
+    }
+
+    private void CancelForm()
+    {
+        ShowForm = false;
+        ErrorMessage = null;
+    }
+
+    private void SelectRow(int id)
+    {
+        if (SelectedId == id)
+            SelectedId = null;
+        else
+            SelectedId = id;
+    }
+}

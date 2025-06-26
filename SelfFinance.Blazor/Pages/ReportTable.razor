@@ -1,0 +1,46 @@
+﻿@using SelfFinance.Application.DTOs.FinancialOperation
+@using SelfFinance.Application.DTOs.TransactionType
+@using Microsoft.AspNetCore.Components
+
+@if (Operations is not null && Operations.Any())
+{
+    <table class="table table-striped mt-2">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Transaction Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var op in Operations)
+            {
+                <tr>
+                    <td>@op.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@op.Description</td>
+                    <td>@op.Amount.ToString("N2")</td>
+                    <td>@GetTransactionTypeName(op.TransactionTypeId)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No operations found.</p>
+}
+
+@code {
+    [Parameter]
+    public List<FinancialOperationDto> Operations { get; set; } = new();
+
+    [Parameter]
+    public List<TransactionTypeDto> TransactionTypes { get; set; } = new();
+
+    private string GetTransactionTypeName(int id)
+    {
+        var type = TransactionTypes.FirstOrDefault(t => t.Id == id);
+        return type?.Name ?? $"Unknown (ID: {id})";
+    }
+}

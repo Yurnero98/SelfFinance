@@ -1,0 +1,64 @@
+﻿
+@inherits LayoutComponentBase
+@using SelfFinance.Blazor.Auth
+@inject NavigationManager Navigation
+@inject JwtAuthenticationStateProvider AuthStateProvider
+
+<PageTitle>SelfFinance.Blazor</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center gap-2">
+            @if (IsAuthenticated)
+            {
+                <button class="btn btn-danger" @onclick="Logout">Logout</button>
+            }
+            else
+            {
+                <button class="btn btn-primary" @onclick="GoToLogin">Login</button>
+                <button class="btn btn-secondary" @onclick="GoToRegister">Register</button>
+            }
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private bool IsAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        AuthStateProvider.AuthenticationStateChanged += async (task) =>
+        {
+            var state = await task;
+            IsAuthenticated = state.User.Identity?.IsAuthenticated ?? false;
+            StateHasChanged();
+        };
+    }
+
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void GoToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+
+    private async Task Logout()
+    {
+        await AuthStateProvider.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

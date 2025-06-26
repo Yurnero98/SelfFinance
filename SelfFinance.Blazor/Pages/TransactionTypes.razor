@@ -1,0 +1,183 @@
+﻿@page "/transactiontypes"
+@using SelfFinance.Application.DTOs.TransactionType
+@using SelfFinance.Blazor.Services
+@inject TransactionTypeService TransactionTypeService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<h3>Transaction Types</h3>
+
+<button class="btn btn-primary mb-3" @onclick="ShowCreateForm">Add New</button>
+
+@if (ErrorMessage != null)
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-striped data-table-3cols">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Is Income</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in transactionTypes)
+            {
+                bool isSelected = item.Id == SelectedId;
+                <tr @onclick="() => SelectRow(item.Id)"
+                    class="@(isSelected ? "selected-row" : "")"
+                    style="cursor:pointer;">
+                    <td>@item.Name</td>
+                    <td>@(item.IsIncome ? "Yes" : "No")</td>
+                    <td>
+                        @if (isSelected)
+                        {
+                            <button class="btn btn-sm btn-secondary" @onclick="() => EditTransactionType(item)" @onclick:stopPropagation> Edit </button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteTransactionType(item.Id)" @onclick:stopPropagation> Delete </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (ShowForm)
+{
+    <EditForm Model="CurrentTransactionType" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Name:</label>
+            <InputText class="form-control" @bind-Value="CurrentTransactionType.Name" />
+        </div>
+        <div class="mb-3">
+            <label>Is Income:</label>
+            <InputCheckbox class="form-check-input" @bind-Value="CurrentTransactionType.IsIncome" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick="CancelForm">Cancel</button>
+    </EditForm>
+}
+
+@code {
+    private List<TransactionTypeDto> transactionTypes = new();
+    private TransactionTypeCreateDto CurrentTransactionType = new();
+    
+    private string? ErrorMessage;
+    private bool IsLoading = true;
+    private bool ShowForm = false;
+    private int? EditingId = null;
+    private int? SelectedId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactionTypes();
+    }
+
+    private async Task LoadTransactionTypes()
+    {
+        try
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+            transactionTypes = await TransactionTypeService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error loading data: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ShowCreateForm()
+    {
+        EditingId = null;
+        CurrentTransactionType = new TransactionTypeCreateDto();
+        ShowForm = true;
+    }
+
+    private void EditTransactionType(TransactionTypeDto item)
+    {
+        EditingId = item.Id;
+        CurrentTransactionType = new TransactionTypeCreateDto
+            {
+                Name = item.Name,
+                IsIncome = item.IsIncome
+            };
+        ShowForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        bool success;
+        if (EditingId.HasValue)
+        {
+            var updateDto = new TransactionTypeUpdateDto
+                {
+                    Name = CurrentTransactionType.Name,
+                    IsIncome = CurrentTransactionType.IsIncome
+                };
+            success = await TransactionTypeService.UpdateAsync(EditingId.Value, updateDto);
+        }
+        else
+        {
+            success = await TransactionTypeService.CreateAsync(CurrentTransactionType);
+        }
+
+        if (success)
+        {
+            ShowForm = false;
+            await LoadTransactionTypes();
+        }
+        else
+        {
+            ErrorMessage = "Operation failed";
+        }
+    }
+
+    private async Task DeleteTransactionType(int id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this item?");
+        if (confirmed)
+        {
+            var success = await TransactionTypeService.DeleteAsync(id);
+            if (success)
+            {
+                await LoadTransactionTypes();
+                if (SelectedId == id)
+                    SelectedId = null; 
+            }
+            else
+            {
+                ErrorMessage = "Delete failed";
+            }
+        }
+    }
+
+    private void CancelForm()
+    {
+        ShowForm = false;
+        ErrorMessage = null;
+    }
+
+    private void SelectRow(int id)
+    {
+        if (SelectedId == id)
+            SelectedId = null;
+        else
+            SelectedId = id;
+    }
+}

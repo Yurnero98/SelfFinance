@@ -1,0 +1,55 @@
+﻿@page "/login"
+@using SelfFinance.Blazor.Auth
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3 class="text-center mb-4">Login</h3>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card p-4 shadow" style="min-width: 300px;">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input id="email" class="form-control" @bind="Email" />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input id="password" type="password" class="form-control" @bind="Password" />
+        </div>
+        <button class="btn btn-primary w-100" @onclick="HandleLogin">Login</button>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="mt-3 text-danger text-center">@ErrorMessage</div>
+        }
+    </div>
+</div>
+
+@code {
+    private string Email = "";
+    private string Password = "";
+    private string ErrorMessage = "";
+
+    private async Task HandleLogin()
+    {
+        ErrorMessage = "";
+
+        var client = HttpClientFactory.CreateClient("SelfFinanceAPI");
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new { Email, Password });
+
+        if (response.IsSuccessStatusCode)
+        {
+            if (AuthStateProvider is JwtAuthenticationStateProvider jwtAuthProvider)
+            {
+                jwtAuthProvider.NotifyUserAuthentication();
+            }
+
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            ErrorMessage = "Login failed! Please check your credentials.";
+        }
+    }
+}

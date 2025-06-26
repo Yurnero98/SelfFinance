@@ -1,0 +1,96 @@
+﻿@page "/reports"
+@using SelfFinance.Application.DTOs
+@using SelfFinance.Application.DTOs.FinancialOperation
+@using SelfFinance.Application.DTOs.TransactionType
+@using SelfFinance.Blazor.Services
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ReportService ReportService
+@inject TransactionTypeService TransactionTypeService
+
+<h3>Reports</h3>
+
+<hr />
+
+<h5>Daily Report</h5>
+<div class="mb-3">
+    <InputDate @bind-Value="SelectedDate" class="form-control w-auto d-inline" />
+    <button class="btn btn-primary ms-2" @onclick="LoadDailyReport">Get Daily Report</button>
+</div>
+
+@if (DailyReport is not null)
+{
+    <div>
+        <p><strong>Total Income:</strong> @DailyReport.TotalIncome</p>
+        <p><strong>Total Expenses:</strong> @DailyReport.TotalExpenses</p>
+        <ReportTable Operations="DailyReport.Operations" TransactionTypes="AvailableTransactionTypes" />
+    </div>
+}
+else
+{
+    <p>No daily report loaded yet.</p>
+}
+
+<hr />
+
+<h5>Period Report</h5>
+<div class="row mb-2">
+    <div class="col-md-4">
+        <label>Start Date</label>
+        <InputDate @bind-Value="StartDate" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label>End Date</label>
+        <InputDate @bind-Value="EndDate" class="form-control" />
+    </div>
+</div>
+<button class="btn btn-primary mb-3" @onclick="LoadPeriodReport">Get Period Report</button>
+
+@if (PeriodReport is not null)
+{
+    <div>
+        <p><strong>Total Income:</strong> @PeriodReport.TotalIncome</p>
+        <p><strong>Total Expenses:</strong> @PeriodReport.TotalExpenses</p>
+        <ReportTable Operations="PeriodReport.Operations" TransactionTypes="AvailableTransactionTypes" />
+    </div>
+}
+else
+{
+    <p>No period report loaded yet.</p>
+}
+
+@code {
+    private DateTime SelectedDate = DateTime.Today;
+    private DateTime StartDate = DateTime.Today.AddDays(-7);
+    private DateTime EndDate = DateTime.Today;
+
+    private ReportDto? DailyReport;
+    private ReportDto? PeriodReport;
+
+    private List<TransactionTypeDto> AvailableTransactionTypes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            AvailableTransactionTypes = await TransactionTypeService.GetAllAsync();
+        }
+    }
+
+    private async Task LoadDailyReport()
+    {
+        DailyReport = await ReportService.GetDailyReportAsync(SelectedDate);
+    }
+
+    private async Task LoadPeriodReport()
+    {
+        if (EndDate < StartDate)
+        {
+            return;
+        }
+
+        PeriodReport = await ReportService.GetPeriodReportAsync(StartDate, EndDate);
+    }
+}
