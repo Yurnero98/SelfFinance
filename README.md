@@ -20,18 +20,18 @@ Personal budgeting app built with ASP.NET Core (Web API) and Blazor Server.
 
 ## Getting Started
 
-Prerequisites
+###Prerequisites
 
 .NET 8 SDK
 
 MS SQL Server (local or remote)
 
-Clone the repository
+###Clone the repository
 
 git clone https://github.com/Yurnero98/SelfFinance.git
 cd SelfFinance
 
-Configure the Database
+###Configure the Database
 
 In SelfFinance.WebApi/appsettings.json, update the connection string to match your SQL Server:
 
@@ -39,12 +39,12 @@ In SelfFinance.WebApi/appsettings.json, update the connection string to match yo
   "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=SelfFinanceDb;Integrated Security=true;TrustServerCertificate=true;"
 }
 
-Apply EF Core Migrations
+###Apply EF Core Migrations
 
 cd SelfFinance.WebApi
  dotnet ef database update
 
-Run the Backend API
+###Run the Backend API
 
 dotnet run --project SelfFinance.WebApi
 
@@ -53,7 +53,7 @@ API will be available at a port like: https://localhost:7101 (check console outp
 ⚡ When you run the Web API project, Swagger UI will open automatically at `https://localhost:7101/swagger`,  
 where you can explore and test all API endpoints interactively.
 
-📡 API Endpoints (examples)
+###📡 API Endpoints (examples)
 
 Method       Endpoint               Description
 
@@ -71,7 +71,7 @@ GET          /api/reports/period    Period-based report
 
 Full Swagger documentation available when you start WebApi project.
 
-Configure Blazor UI
+###Configure Blazor UI
 
 In SelfFinance.BlazorApp/appsettings.json, make sure the BaseUrl matches the backend:
 
@@ -81,7 +81,7 @@ In SelfFinance.BlazorApp/appsettings.json, make sure the BaseUrl matches the bac
 
 ⚠️ Ports may differ. Adjust to match the port used by SelfFinance.WebApi.
 
-Then run:
+###Then run:
 
 dotnet run --project SelfFinance.BlazorApp
 
