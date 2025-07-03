@@ -20,7 +20,7 @@ Personal budgeting app built with ASP.NET Core (Web API) and Blazor Server.
 
 ## Getting Started
 
-###Prerequisites
+### Prerequisites
 
 .NET 8 SDK
 
